@@ -70,9 +70,6 @@ try {
             throw new Exception('Failed to update the file meta in Google Drive.');
         }
          $fileUrl=$gDriveFID;
-        // $fileUrl = "https://drive.google.com/file/d/{$gDriveFID}/view";
-   
-
         unlink('../assets/temp/' . $fname);
     }
 
@@ -84,10 +81,13 @@ try {
         'employe_department' => $department,
         'employe_manager' => $manager,
         'employe_status' => $status,
-        'employe_file_path' => $fileUrl,
         'employe_added_by' => $_SESSION['user_id'],
         'employe_added_on' => date('Y-m-d H:i:s')
     ];
+
+    if($fileUrl){ //if file uploaded then add this key
+       $employeData['employe_file_path']=$fileUrl;
+    }
     
    $result= $database->updateRecord("employees", $employeData, $condition);
     
@@ -102,6 +102,9 @@ try {
         $existingEmployees = json_decode($redis->get('employees'), true);
         foreach ($existingEmployees as $index => $employee) {
             if ($employee['employe_id'] == $employeData['employe_id']) {
+                if(!$fileUrl){//if empty not update previous one in redis
+                    $employeData['employe_file_path']=$existingEmployees[$index]['employe_file_path'];
+                 }
                 $existingEmployees[$index] = $employeData;
                 break;
             }
