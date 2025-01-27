@@ -48,7 +48,9 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" id="submitEmployeForm" class="btn btn-primary"><i class="fa fa-upload"></i> Save</button>
+        <button type="button" id="submitEmployeForm" class="btn btn-primary">
+          <i class="fa fa-upload"></i> Save
+        </button>
         </div>
     </div>
   </div>

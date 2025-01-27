@@ -96,8 +96,6 @@ $gdriveAPI = new GoogleDriveUploadAPI();
   <script src="../assets/js/dashboard.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 
-
-
   <script>
   let data = [];
   const rowsPerPage = 5;
@@ -147,7 +145,8 @@ $gdriveAPI = new GoogleDriveUploadAPI();
         <td>${row.employe_manager}</td>
         <td>${row.employe_status == 1 ? 'Active' : 'Inactive'}</td>
         <td>
-            <a href="${row.employe_file_path?row.employe_file_path:'#'}" target="_blank"  class="btn btn-info btn-sm">View document</a>
+            <a href="${`https://drive.google.com/file/d/${row.employe_file_path}/view`}" target="_blank"  class="btn btn-info btn-sm">View document</a>
+            <a href="${`https://drive.usercontent.google.com/u/0/uc?id=${row.employe_file_path}&export=download`}" class="btn btn-info btn-sm">download document</a>
             <button 
             class="btn btn-warning btn-sm employe-edit-btn" 
             data-bs-toggle="modal" 
@@ -210,8 +209,12 @@ $gdriveAPI = new GoogleDriveUploadAPI();
   $(document).ready(function () {
   $('#submitEmployeForm').click(function () {
     try {
-        const isUpdate = !!$('#employe_id').val();
-        
+      const isUpdate = !!$('#employe_id').val();
+        const $button = $(this);
+        $buttonText=isUpdate?'Updated':'Save';
+        $button.html(`${$buttonText} <div class="spinner-border text-light ms-2" style="width:12px; height:12px;" role="status"><span class="visually-hidden">Loading...</span></div>`);
+        $button.prop('disabled', true);
+
         const formData = new FormData();
         formData.append('employeName', $('#employeName').val());
         formData.append('employeEmail', $('#employeEmail').val());
@@ -225,11 +228,9 @@ $gdriveAPI = new GoogleDriveUploadAPI();
         }
 
         const url = isUpdate 
-            ? 'http://localhost/php-gdrive-upload/apis/update.php' 
+            ? 'http://localhost/php-gdrive-upload/apis/employe-update.php' 
             : 'http://localhost/php-gdrive-upload/apis/upload.php';
-        const successMessage = isUpdate 
-            ? 'Data updated successfully!' 
-            : 'Data uploaded successfully!';
+
             
         // AJAX request to upload or update data
         $.ajax({
@@ -244,17 +245,22 @@ $gdriveAPI = new GoogleDriveUploadAPI();
                    fetchData();
                    resetForm();
                   }
+                  $button.html($buttonText)
+                  $button.prop('disabled', false);
                   alert(response.message);
-            },
+                },
             error: function (xhr, status, error) {
-                alert(`An error occurred while processing the request: ${error}`);
+              $button.html($buttonText)
+              $button.prop('disabled', false);
+              alert(`An error occurred while processing the request: ${error}`);
             }
+
+            
         });
     } catch (e) {
         alert(`An error occurred: ${e.message}`);
     }
 });
-
 
   function resetForm() { 
     $('#employeName').val('');

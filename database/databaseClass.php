@@ -59,7 +59,7 @@ class DatabaseClass {
 
     // Update an existing record in the database
     public function updateRecord($table, $data, $condition) {
-        // Create SQL query dynamically for SET clauses
+         try{
         $setClauses = [];
         foreach ($data as $column => $value) {
             $setClauses[] = "$column = ?";
@@ -77,16 +77,26 @@ class DatabaseClass {
         $stmt = mysqli_prepare($this->connection, $sql);
 
         // Bind parameters for both SET and WHERE clauses
-        $types = str_repeat('s', count($data) + count($condition)); // Assuming all values are strings.
+        $types = str_repeat('s', count($data) + count($condition));
         $params = array_merge(array_values($data), array_values($condition));
         mysqli_stmt_bind_param($stmt, $types, ...$params);
 
         // Execute the query and return the result
-        return mysqli_stmt_execute($stmt);
+        $result=mysqli_stmt_execute($stmt);
+        
+        if($result){
+            return true;
+        }else{
+            return false;
+         }
+      }catch (Exception $e) {
+       return false;
+     }
     }
 
     // View records from the database
     public function viewRecords($table, $columns = "*", $condition = []) {
+        try{
         // Create SQL query dynamically
         $sql = "SELECT $columns FROM $table";
 
@@ -111,6 +121,9 @@ class DatabaseClass {
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         return mysqli_fetch_all($result, MYSQLI_ASSOC);
+    }catch(Exception $e){
+        return [];
+    }
     }
     
     // Close the database connection
